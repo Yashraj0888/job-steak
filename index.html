@@ -4,12 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ApplyFlow — Job Application Tracker</title>
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
 :root{
  --paper:#f7f6f1;--surface:#fffefa;--surface-soft:#f0efe8;--ink:#24251f;
  --muted:#77786f;--line:#e8e5dc;--accent:#e66b4e;--accent-dark:#c94e34;
- --green:#47785b;--green-soft:#eaf1e9;--yellow:#e9bd58;--shadow:0 10px 30px rgba(42,39,29,.055);
+ --tile-line:#cdc8ba;--green:#47785b;--green-soft:#eaf1e9;--yellow:#e9bd58;--shadow:0 10px 30px rgba(42,39,29,.055);
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
@@ -120,53 +122,87 @@ button,a{-webkit-tap-highlight-color:transparent}
 .reset-btn:hover{text-decoration:underline}
 .count-line{color:var(--muted);font:700 10px 'DM Sans',sans-serif;letter-spacing:.6px;margin:12px 2px 4px;text-transform:uppercase}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(236px,1fr));gap:12px}
-.band{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin:24px 0 2px}
-.band:first-child{margin-top:10px}
+/* ================= Company list: a logo wall grouped by sector ================= */
+.grid{display:block}
+.sector{margin-top:32px}
+.sector:first-child{margin-top:12px}
+.band{display:flex;align-items:baseline;gap:10px;margin:0 2px 12px}
 .band b{font:800 11px 'Manrope',sans-serif;color:var(--c);letter-spacing:.6px}
-.band h4{margin:0;font:800 18px/1.2 'Manrope',sans-serif;letter-spacing:-.6px}
-.band i{flex:1;height:1px;background:var(--line);min-width:12px}
+.band h4{margin:0;font:800 17px/1.2 'Manrope',sans-serif;letter-spacing:-.5px}
+.band i{flex:1;height:1px;background:var(--line);min-width:12px;align-self:center}
 .band span{font:700 10px 'DM Sans',sans-serif;color:var(--muted);letter-spacing:.6px;font-variant-numeric:tabular-nums;white-space:nowrap}
 
-.card{position:relative;display:flex;flex-direction:column;gap:12px;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:18px;min-width:0;animation:cardIn .35s both;transition:border-color .2s,box-shadow .2s,background .2s,transform .2s}
-.card:hover{border-color:#c7c1b3;box-shadow:0 10px 24px #28251c0d;transform:translateY(-2px)}
-.card.done{background:var(--green-soft);border-color:#c4d9c7}
-.grid.still .card{animation:none}
-.card-top{display:flex;align-items:center;gap:13px;min-width:0;padding-right:30px}
-/* logo tile: nothing is clipped, the logo is always shown whole */
-.lbox{position:relative;flex:none;width:54px;height:54px;border-radius:15px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);display:grid;place-items:center;color:var(--ink)}
-.lbox svg{width:30px;height:30px;display:block}
-.mono{width:100%;height:100%;border-radius:15px;display:grid;place-items:center;font:800 15px 'Manrope',sans-serif;letter-spacing:-.4px}
-.lbox img.rl{position:absolute;left:5px;top:5px;width:44px;height:44px;object-fit:contain;border-radius:10px;background:#fff;opacity:0;transition:opacity .25s}
+.rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:10px}
+.tile{position:relative;min-width:0;background:var(--surface);border:1px solid var(--tile-line);border-radius:18px;animation:cardIn .3s backwards;transition:transform .38s cubic-bezier(.34,1.56,.64,1),box-shadow .3s ease,border-color .2s,background .3s}
+.grid.still .tile{animation:none}
+/* soft accent glow that rises from the bottom edge, kept inside the tile */
+.tile:before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;opacity:0;transition:opacity .35s ease;
+ background:radial-gradient(130% 80% at 50% 118%,color-mix(in srgb,var(--accent) 30%,transparent) 0%,color-mix(in srgb,var(--accent) 17%,transparent) 28%,color-mix(in srgb,var(--accent) 7%,transparent) 55%,transparent 100%)}
+.tile.done:before{background:radial-gradient(130% 80% at 50% 118%,color-mix(in srgb,var(--green) 26%,transparent) 0%,color-mix(in srgb,var(--green) 14%,transparent) 28%,color-mix(in srgb,var(--green) 6%,transparent) 55%,transparent 100%)}
+.tile:hover:before{opacity:1}
+.tmain{position:relative;z-index:1}
+.tile .tick{z-index:2}
+/* pop out on hover: springy lift + slight grow, logo leans in, neighbours stay underneath */
+.tile:hover{z-index:3;border-color:#a9a393;box-shadow:0 20px 34px -12px #28251c38,0 8px 16px -6px #28251c1a;transform:translateY(-6px) scale(1.04)}
+.tile:active{transform:translateY(-2px) scale(.985);transition-duration:.12s}
+.lbox{transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.tile:hover .lbox{transform:translateY(-3px) scale(1.12)}
+.tile .tname{transition:color .2s,transform .35s cubic-bezier(.34,1.56,.64,1)}
+.tile:hover .tname{transform:translateY(1px)}
+.tile.done{background:var(--green-soft);border-color:#a8c8ae}
+/* the whole tile opens the careers page; only the tick is separate */
+.tmain{display:flex;flex-direction:column;align-items:center;gap:12px;height:100%;padding:24px 12px 16px;text-align:center;color:inherit;text-decoration:none;border-radius:18px}
+.tmain:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+/* logo: no frame, never clipped */
+.lbox{position:relative;width:80px;height:48px;display:grid;place-items:center;color:var(--ink)}
+.lbox svg{width:36px;height:36px;display:block}
+.mono{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font:800 15px 'Manrope',sans-serif;letter-spacing:-.4px;transition:opacity .25s}
+.lbox.has-img .mono{opacity:0}
+.lbox img.rl{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .25s}
 .lbox img.rl.ok{opacity:1}
-/* whole-company tick: sits in the card corner, not on the logo */
-.tick{position:absolute;right:12px;top:12px;width:22px;height:22px;border-radius:50%;border:1.5px solid #d6d2c6;background:transparent;display:grid;place-items:center;color:transparent;transition:background .25s,border-color .25s,color .25s,transform .25s}
-.tick{padding:0;cursor:pointer}
-.tick:before{content:"";position:absolute;inset:-9px}
+.tname{font:700 13px/1.3 'Manrope',sans-serif;letter-spacing:-.2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;transition:color .2s}
+.tile:hover .tname{color:var(--accent-dark)}
+.tick{position:absolute;top:8px;right:8px;width:24px;height:24px;padding:0;cursor:pointer;border-radius:50%;border:1.5px solid #ddd8cc;background:var(--surface);display:grid;place-items:center;color:transparent;transition:background .25s,border-color .25s,color .25s}
+.tick:before{content:"";position:absolute;inset:-8px}
 .tick svg{width:12px;height:12px}
-.card.done .tick{background:var(--green);border-color:var(--green);color:#fff}
-.card.just .tick{animation:tickIn .28s ease-out}
-@keyframes tickIn{from{transform:scale(.7)}to{transform:scale(1)}}
-.cinfo{min-width:0;flex:1}
-.cname{font:800 14px/1.28 'Manrope',sans-serif;letter-spacing:-.25px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;transition:color .25s}
-.ccat{display:flex;align-items:center;gap:6px;margin-top:3px;color:var(--muted);font:700 9px/1.3 'DM Sans',sans-serif;letter-spacing:.7px;text-transform:uppercase}
-.ccat i{width:7px;height:7px;border-radius:50%;background:var(--c);flex:none}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.btn{height:40px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:800 11px 'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;cursor:pointer;white-space:nowrap;transition:transform .18s,background .2s,border-color .2s}
-.btn:hover{transform:translateY(-1px)}
-.btn.careers{background:#fbf0eb;color:var(--accent-dark);border-color:#f3d9cf}
-.btn.careers:hover{background:#f6dfd6}
-.btn.mark{background:var(--ink);border-color:var(--ink);color:#fffefa}
-.btn.mark:hover{background:#3a3b33}
-.btn.mark{transition:transform .18s,background .3s,border-color .3s}
-.card.done .btn.mark{background:var(--green);border-color:var(--green)}
-.card.done .btn.careers{background:#fffefa;border-color:#d3e2d4;color:#617566}
-.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:44px;border:1px dashed #cbc8bc;border-radius:18px;background:#fffefa}
+.tile:hover .tick{border-color:#b5b0a2;color:#d3cec1}
+.tile .tick:hover{border-color:var(--green);color:var(--green)}
+.tile.done .tick,.tile.done:hover .tick{background:var(--green);border-color:var(--green);color:#fff}
+.tile.just .tick{animation:tickIn .28s ease-out}
+@keyframes tickIn{from{transform:scale(.75)}to{transform:scale(1)}}
+/* with a mouse, keep untouched tiles quiet: the tick ring only firms up on hover */
+@media(hover:hover){.tile:not(.done):not(:hover) .tick{border-color:#ebe7dd}}
+@media(hover:none){.tile:hover{transform:none;box-shadow:none;border-color:var(--tile-line);z-index:auto}.tile:hover .lbox,.tile:hover .tname{transform:none}.tile:active{transform:scale(.96)}.tile.done:hover{border-color:#a8c8ae}.tile:hover .tname{color:inherit}.tile:hover:before{opacity:0}}
+.empty{text-align:center;color:var(--muted);padding:44px;border:1px dashed #cbc8bc;border-radius:18px;background:#fffefa}
 
 footer{color:#96958b;font:500 10px 'DM Sans',sans-serif;text-align:center;margin-top:44px;letter-spacing:.2px}
 @keyframes rise{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
 @keyframes cardIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+/* ---------- Desktop: sticky navbar that picks up the streak score ---------- */
+.nav-streak{display:none}
+@media(min-width:861px){
+ body{overflow-x:clip}
+ .top{position:sticky;top:0;z-index:30;margin:-14px -30px 0;padding:16px 30px;border-bottom-color:var(--line);transition:border-color .35s}
+ .top:before{content:"";position:absolute;z-index:-1;top:0;bottom:0;left:50%;width:100vw;margin-left:-50vw;background:color-mix(in srgb,var(--paper) 84%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);box-shadow:0 10px 28px #26251a0b;opacity:0;transition:opacity .35s ease}
+ .top.stuck{border-bottom-color:transparent}
+ .top.stuck:before{opacity:1}
+ .rail{top:90px;max-height:calc(100vh - 108px)}
+ .nav-streak{display:flex;align-items:center;gap:12px;margin-left:auto;padding:6px 14px 6px 7px;background:var(--ink);color:#fffefa;border-radius:15px;box-shadow:0 8px 20px #1a190f26;
+  opacity:0;transform:translateY(-12px) scale(.96);transform-origin:50% 0;visibility:hidden;pointer-events:none;
+  transition:opacity .4s cubic-bezier(.2,.8,.2,1),transform .5s cubic-bezier(.2,.8,.2,1),visibility 0s linear .5s}
+ body.past-hero .nav-streak{opacity:1;transform:none;visibility:visible;pointer-events:auto;transition-delay:0s}
+ .ns-flame{width:30px;height:30px;border-radius:10px;background:#ffffff14;display:grid;place-items:center;color:#8b8b80;flex:none;transition:color .4s}
+ .ns-flame svg{width:17px;height:17px}
+ .nav-streak.lit .ns-flame{color:var(--yellow)}
+ .ns-main{min-width:0}
+ .ns-main b{display:block;font:800 14px/1.2 'Manrope',sans-serif;letter-spacing:-.3px;white-space:nowrap}
+ .ns-main small{display:block;color:#bdbcb0;font:600 10px/1.3 'DM Sans',sans-serif;margin-top:1px;white-space:nowrap}
+ .ns-pips{display:flex;gap:4px;flex:none}
+ .ns-pips i{width:7px;height:20px;border-radius:5px;background:#ffffff22;transition:background .3s}
+ .ns-pips i.on{background:#8fd1a4}
+}
 
 /* ---------- Tablet & mobile ---------- */
 @media(max-width:860px){
@@ -219,25 +255,33 @@ footer{color:#96958b;font:500 10px 'DM Sans',sans-serif;text-align:center;margin
  .search{flex:1 1 100%}
  .seg{flex:1}
  .filter{flex:1;padding:0 8px}
- .grid{grid-template-columns:1fr;gap:10px}
- .band h4{font-size:16px}
- .btn{height:44px;font-size:12px}
- .card:hover{transform:none}
+ .rows{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+ .band h4{font-size:15px}
+ .tile{border-radius:16px}
+ .tmain{gap:10px;padding:20px 6px 12px;border-radius:16px}
+ .lbox{width:64px;height:40px}.lbox svg{width:30px;height:30px}.mono{width:40px;height:40px;border-radius:12px;font-size:13px}
+ .tname{font-size:12px}
+ .tick{top:6px;right:6px;width:22px;height:22px}
 }
-@media(max-width:380px){.wrap{padding-left:12px;padding-right:12px}.rail{margin:0 -12px;padding-left:12px;padding-right:12px}.st-best{display:none}.stat strong{font-size:22px}.btn{font-size:11px}.reset-pill{padding:6px 9px}}
+@media(max-width:380px){.wrap{padding-left:12px;padding-right:12px}.rail{margin:0 -12px;padding-left:12px;padding-right:12px}.st-best{display:none}.stat strong{font-size:22px}.reset-pill{padding:6px 9px}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="top">
+  <header class="top" id="topbar">
     <div class="brand"><div class="logo">A</div><div><h1>ApplyFlow</h1><p>Your daily job application tracker</p></div></div>
+    <div class="nav-streak" id="navStreak" aria-hidden="true">
+      <div class="ns-flame"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.48 12.35c-1.57-4.08-7.16-4.3-5.81-10.23.1-.44-.37-.78-.75-.55C9.29 3.71 6.68 8 8.87 13.62c.18.46-.36.89-.75.59-1.81-1.37-2-3.34-1.84-4.75.06-.52-.62-.77-.91-.34C4.69 10.16 4 11.84 4 14.37c.38 5.6 5.11 7.32 6.81 7.54 2.43.31 5.06-.14 6.95-1.87 2.08-1.93 2.84-5.01 1.72-7.69z"/></svg></div>
+      <div class="ns-main"><b id="navTitle">0 day streak</b><small id="navSub">0 / 5 applied today</small></div>
+      <div class="ns-pips" id="navPips"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
     <div class="reset-pill" id="resetCountdown">⏱ Reset in 24h</div>
   </header>
   <section class="hero">
     <div class="hero-copy">
       <div class="eyebrow">Make your next move</div>
       <h2>Make your next move.<br><em>One application at a time.</em></h2>
-      <p>Open each company’s careers page, apply, then tick it off here. Apply to at least 5 jobs every day to keep your streak alive.</p>
+      <p>Tap a company to open its careers page, apply, then tick the circle. Apply to at least 5 jobs every day to keep your streak alive.</p>
       <div class="chips"><span class="chip"><i></i><b id="chipTotal">0</b> companies</span><span class="chip"><i></i><b>8</b> sectors</span><span class="chip"><i></i>Goal <b>5</b> / day</span></div>
     </div>
     <aside class="streak" id="streakCard" aria-label="Daily streak">
@@ -371,7 +415,8 @@ function nextLogo(i){
 document.addEventListener("load",e=>{
   const i = e.target;
   if(i instanceof HTMLImageElement && i.classList.contains("rl")){
-    if(!/\.svg(\?|$)/i.test(i.src) && i.naturalWidth<24) nextLogo(i); else i.classList.add("ok");
+    if(!/\.svg(\?|$)/i.test(i.src) && i.naturalWidth<24) nextLogo(i);
+    else { i.classList.add("ok"); i.parentNode.classList.add("has-img"); }
   }
 },true);
 document.addEventListener("error",e=>{
@@ -415,6 +460,7 @@ function renderStreak(){
   const card = document.getElementById("streakCard"), dock = document.getElementById("dock");
   card.classList.toggle("lit",hit); card.classList.toggle("hit",hit);
   dock.classList.toggle("lit",hit); dock.classList.toggle("hit",hit);
+  document.getElementById("navStreak").classList.toggle("lit",hit);
   document.getElementById("streakNum").textContent = streak;
   document.getElementById("bestNum").textContent = best;
   document.getElementById("streakSub").textContent = sub;
@@ -425,6 +471,10 @@ function renderStreak(){
   document.querySelectorAll("#dockPips i").forEach((p,idx)=>p.classList.toggle("on",idx<Math.min(streak,7)));
   document.getElementById("dockTitle").textContent = `${streak} day streak`;
   document.getElementById("dockSub").textContent = hit ? "Daily goal complete" : `${n} / ${GOAL} applied today`;
+  /* desktop navbar: same compact score as the bottom bar, no calendar */
+  document.querySelectorAll("#navPips i").forEach((p,idx)=>p.classList.toggle("on",idx<Math.min(streak,7)));
+  document.getElementById("navTitle").textContent = `${streak} day streak`;
+  document.getElementById("navSub").textContent = hit ? "Daily goal complete" : `${n} / ${GOAL} applied today`;
   renderHeat();
 }
 
@@ -471,20 +521,17 @@ function render(anim){
     shown += list.length;
     const total = all.filter(c=>c.cat===ci).length;
     const done = all.filter(c=>c.cat===ci && applied.has(c.id)).length;
-    html += `<div class="band" style="--c:${cat.color}"><b>${String(ci+1).padStart(2,"0")}</b><h4>${escapeHTML(cat.key)}</h4><i></i><span data-cat="${ci}">${done}/${total} applied</span></div>`;
+    html += `<section class="sector" style="--c:${cat.color}"><div class="band"><b>${String(ci+1).padStart(2,"0")}</b><h4>${escapeHTML(cat.key)}</h4><i></i><span data-cat="${ci}">${done}/${total} applied</span></div><div class="rows">`;
     list.forEach((c,i)=>{
-      const d = applied.has(c.id);
-      html += `<article class="card ${d?"done":""}" style="--c:${cat.color};animation-delay:${Math.min(i*10,240)}ms">
-        <button class="tick" data-id="${c.id}" aria-label="${d?"Unmark":"Mark"} ${escapeHTML(c.name)} as applied">${TICK}</button>
-        <div class="card-top">
-          <div class="lbox">${logoHTML(c)}</div>
-          <div class="cinfo"><div class="cname">${escapeHTML(c.name)}</div><div class="ccat"><i></i>${escapeHTML(cat.label)}</div></div>
-        </div>
-        <div class="actions">
-          <a class="btn careers" href="${c.url}" target="_blank" rel="noopener noreferrer">Careers ↗</a>
-          <button class="btn mark" data-id="${c.id}" aria-pressed="${d}">${d?"✓ Applied":"Mark applied"}</button>
-        </div></article>`;
+      const d = applied.has(c.id), nm = escapeHTML(c.name);
+      html += `<div class="tile ${d?"done":""}" style="animation-delay:${Math.min(i*8,200)}ms">
+        <a class="tmain" href="${c.url}" target="_blank" rel="noopener noreferrer" aria-label="${nm} careers page (opens in a new tab)" title="Open ${nm} careers page ↗">
+          <span class="lbox">${logoHTML(c)}</span><span class="tname">${nm}</span>
+        </a>
+        <button class="tick" data-id="${c.id}" aria-pressed="${d}" aria-label="${d?"Unmark":"Mark"} ${nm} as applied">${TICK}</button>
+      </div>`;
     });
+    html += `</div></section>`;
   });
   const grid = document.getElementById("companyList");
   grid.classList.toggle("still",!anim);
@@ -496,7 +543,7 @@ function render(anim){
 
 function onGridClick(e){
   const b = e.target.closest("[data-id]"); if(!b) return;
-  const id = Number(b.dataset.id), card = b.closest(".card");
+  const id = Number(b.dataset.id), card = b.closest(".tile");
   const nowDone = !applied.has(id);
   if(nowDone) applied.add(id); else applied.delete(id);
   save();
@@ -504,11 +551,9 @@ function onGridClick(e){
   /* update just this card so nothing else flickers */
   card.classList.toggle("done",nowDone);
   card.classList.remove("just"); if(nowDone){ void card.offsetWidth; card.classList.add("just"); }
-  const m = card.querySelector(".btn.mark");
-  m.textContent = nowDone ? "✓ Applied" : "Mark applied";
-  m.setAttribute("aria-pressed",nowDone);
-  const t = card.querySelector(".tick"), nm = card.querySelector(".cname").textContent;
-  t.setAttribute("aria-label",`${nowDone?"Unmark":"Mark"} ${nm} as applied`);
+  const nm = card.querySelector(".tname").textContent;
+  b.setAttribute("aria-pressed",nowDone);
+  b.setAttribute("aria-label",`${nowDone?"Unmark":"Mark"} ${nm} as applied`);
   refresh();
 }
 document.getElementById("companyList").addEventListener("click",onGridClick);
@@ -534,7 +579,17 @@ document.addEventListener("visibilitychange",()=>{ if(!document.hidden) updateCo
 if("IntersectionObserver" in window){
   new IntersectionObserver(en=>document.getElementById("dock").classList.toggle("away",en[0].isIntersecting),{threshold:.15})
     .observe(document.getElementById("streakCard"));
+  /* desktop: once the hero has scrolled under the navbar, the streak score slides into it */
+  new IntersectionObserver(en=>{
+    const e = en[0], past = !e.isIntersecting && e.boundingClientRect.top<0;
+    document.body.classList.toggle("past-hero",past);
+    document.getElementById("navStreak").setAttribute("aria-hidden",past?"false":"true");
+  },{rootMargin:"-76px 0px 0px 0px",threshold:0}).observe(document.querySelector(".hero"));
 }
+/* navbar gets its frosted background once the page starts scrolling */
+const topbar = document.getElementById("topbar");
+function onScrollBar(){ topbar.classList.toggle("stuck",window.scrollY>6); }
+window.addEventListener("scroll",onScrollBar,{passive:true}); onScrollBar();
 document.getElementById("chipTotal").textContent = TOTAL;
 initialiseStorage(); render(true); updateCountdown(); setInterval(updateCountdown,1000);
 </script>
